@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Input } from '@/components/ui'
-import { cn } from '@/lib/cn'
+import { useState } from 'react'
+import { Button } from '@/components/ui'
+import { NumericPad } from './NumericPad'
 
 interface ProductSearchInputProps {
   onSearchChange: (code: string) => void
@@ -17,36 +17,34 @@ export function ProductSearchInput({
   disabled,
   placeholder = 'Ingresa código SKU',
 }: ProductSearchInputProps) {
-  const [code, setCode] = useState('')
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null)
+  const [isNumericPadOpen, setIsNumericPadOpen] = useState(false)
 
-  useEffect(() => {
-    if (debounceTimer) clearTimeout(debounceTimer)
-
-    const timer = setTimeout(() => {
-      if (code.trim()) {
-        onSearchChange(code.trim())
-      }
-    }, 300)
-
-    setDebounceTimer(timer)
-
-    return () => {
-      if (timer) clearTimeout(timer)
-    }
-  }, [code, onSearchChange])
+  const handleNumericPadConfirm = (code: string) => {
+    onSearchChange(code)
+    setIsNumericPadOpen(false)
+  }
 
   return (
-    <Input
-      id="sku-input"
-      type="text"
-      inputMode="numeric"
-      placeholder={placeholder}
-      value={code}
-      onChange={(e) => setCode(e.currentTarget.value.toUpperCase())}
-      error={error}
-      disabled={disabled}
-      autoFocus
-    />
+    <>
+      <div className="space-y-2">
+        <Button
+          onClick={() => setIsNumericPadOpen(true)}
+          disabled={disabled}
+          className="w-full"
+          size="lg"
+        >
+          Ingresa Código de Producto
+        </Button>
+        {error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
+      </div>
+
+      <NumericPad
+        isOpen={isNumericPadOpen}
+        onConfirm={handleNumericPadConfirm}
+        onCancel={() => setIsNumericPadOpen(false)}
+      />
+    </>
   )
 }
